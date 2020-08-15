@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <script>
+        localStorage.setItem('isVerified', false)
+        //          Get userName on clicking Start Game
+        function getUserName(){
+            let userName = prompt('Enter your name');
+            if(userName && userName.trim().length){
+                userName = userName.trim();
+                userName = userName.charAt(0).toUpperCase() + userName.slice(1);
+                let userObj = {};
+                let users = JSON.parse(localStorage.getItem('users')) || [];
+                
+                userObj[userName] = 0;
+                users.push(userObj);
+
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('isVerified', JSON.stringify(true));
+                window.open('sudoku.html', '_self');
+            }
+        }
+
+        //              Modal
+        
+        let modal = document.createElement('div');
+        modal.setAttribute('class', 'modal');
+        
+        let modalContent = document.createElement('div')
+        modalContent.setAttribute('class', 'modal-content');
+        
+        let closeBtn = document.createElement('span');
+        closeBtn.setAttribute('class', 'close-button');
+        
+        modalContent.append(closeBtn);
+        modal.append(modalContent);
+        document.body.append(modal);
+        function toggleModal() {
+            modalField.classList.toggle("show-modal");
+            let modalVisible = document.querySelector('.show-modal');
+            if (modalVisible) {
+                window.addEventListener("click", function(){
+                    windowOnClick();
+                }, true);
+            }
+            else{
+                window.removeEventListener("click", function(){
+                    windowOnClick();
+                });
+            }
+        }
+        
+        function windowOnClick(event) {
+            let modalVisible = document.querySelector('.show-modal');
+            if (modalVisible) {
+                toggleModal();
+            }
+        }
+            
+        function addtableHeader(value){
+            let header = document.createElement('th');
+            header.innerText = value;
+            header.setAttribute('scope', 'col');
+            return header;
+        }
+
+        function sortByScore(details){
+            let sorted = details.sort(function(a, b){
+                if(b[Object.keys(b)[0]] == a[Object.keys(a)[0]]) return Object.keys(a)[0] - Object.keys(b)[0];
+                return b[Object.keys(b)[0]] - a[Object.keys(a)[0]];
+            })
+            return sorted;
+        }
+        
+        //                  ScoreBoard Table Creation
+        function createTable(){
+            let userDetails = JSON.parse(localStorage.getItem('users'));
+            userDetails = sortByScore(userDetails);
+            if(userDetails.length == 0) return;
+            if(modalContent.lastElementChild.nodeName == 'TABEL'){
+                modalContent.removeChild(modalContent.lastElementChild)
+            }
+
+            let table =document.createElement('tabel');
+            let thead = document.createElement('thead');
+            
+            let headrow = document.createElement('tr');
+            
+            let userRank = addtableHeader('Rank');
+            let userName = addtableHeader('Name');
+            let userScore = addtableHeader('Score');
+            
+            headrow.append(userRank, userName, userScore);
+            thead.append(headrow);
+            
+            let tbody = document.createElement('tbody');
+            for(let i in userDetails){
+                let userInfo = userDetails[i];
+                let userName = Object.keys(userInfo)[0];
+
+                let tr = document.createElement('tr');
+
+                let userNum = document.createElement('td');
+                userNum.innerText = +i + 1;
+                tr.append(userNum);
+
+                let name = document.createElement('td');
+                name.innerText = userName;
+                tr.append(name);
+
+                let score = document.createElement('td');
+                score.innerText = userInfo[userName];
+                tr.append(score);
+                tbody.append(tr);
+            }
+            table.append(thead, tbody)
+            modalContent.append(table)
+        }
+
+        //          Conatiner
+
+        let container = document.createElement('div');
+        container.classList.add('container');
+
+        //          Title
+
+        let gameTitle = document.createElement('div');
+        gameTitle.classList.add('gameTitle');
+        gameTitle.innerText = 'SUDOKU';
+
+        //          Start Game Button
+        
+        let startButton = document.createElement('button');
+        startButton.classList.add('button');
+        startButton.setAttribute('onclick', 'getUserName()');
+        startButton.innerText = 'Start Game';
+
+        //          Show Result Button
+
+        let ShowResult = document.createElement('button');
+        ShowResult.classList.add('button', 'result');
+        ShowResult.setAttribute('onclick', 'createTable()');
+        ShowResult.innerText = 'Leaderboard'
+
+
+        container.append(gameTitle, startButton, ShowResult);
+
+        document.body.append(container);
+
+        //          Adding Event Listeners for modal
+        
+        let closeBtnEvent = document.querySelector(".close-button");
+        let resultButton = document.querySelector(".result");
+        let modalField = document.querySelector(".modal");
+        
+        
+        resultButton.addEventListener("click", toggleModal);
+        closeBtnEvent.addEventListener("click", toggleModal);
+            
+
+    </script>
+</body>
+</html>
